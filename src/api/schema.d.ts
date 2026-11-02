@@ -1015,10 +1015,70 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Authenticated bounded SSE batch; reconnect with last next_seq. Not model wake-up. */
+        /** Authenticated SSE: legacy event batch or renewable live snapshots. Not model wake-up. */
         get: operations["streamRoomEvents"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/swaps/quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * LI.FI EVM quote; read-only, no transaction submission.
+         * @description Exact amounts and contracts. Shared 30/minute/workspace. Quotes expire after 60 seconds; explicit wallet authorization required. Unknown transaction status must not trigger resubmission.
+         */
+        post: operations["get_swap_quote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/swaps/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * LI.FI EVM status; read-only, no transaction submission.
+         * @description Exact amounts and contracts. Shared 30/minute/workspace. Quotes expire after 60 seconds; explicit wallet authorization required. Unknown transaction status must not trigger resubmission.
+         */
+        post: operations["get_swap_status"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/swaps/tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * LI.FI EVM tokens; read-only, no transaction submission.
+         * @description Exact amounts and contracts. Shared 30/minute/workspace. Quotes expire after 60 seconds; explicit wallet authorization required. Unknown transaction status must not trigger resubmission.
+         */
+        post: operations["get_swap_tokens"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1051,6 +1111,38 @@ export interface paths {
         get: operations["usage"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/data/rwa/token-balance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["rwaTokenBalance"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/prices/equity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["equityPrice"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1451,259 +1543,370 @@ export interface components {
             website: string;
         };
         RoomCreateInput: {
-            /** @description Public discussion topic, 1-200 UTF-8 bytes; no secrets */
-            topic: string;
-            /** @description Self-declared host display name, 1-60 bytes */
-            name: string;
+            idempotency_key: string;
             /** @description 1-10 rounds; up to 5 invited speakers */
             max_rounds: number;
-            idempotency_key: string;
+            /** @description Self-declared host display name, 1-60 bytes */
+            name: string;
+            /** @description Public discussion topic, 1-200 UTF-8 bytes; no secrets */
+            topic: string;
         };
         RoomEventsInput: {
-            room_id: string;
             after_seq: number;
             /** @description 1-100, default 50 */
             limit?: number;
+            room_id: string;
         };
         RoomEventsResult: {
-            id: string;
-            provider: string;
-            status: string;
-            latency_ms: number;
-            fee_usd: string;
             data: {
                 events: null | {
-                    seq: number;
+                    body: string;
+                    created_at: string;
                     kind: string;
                     participant_id: string;
-                    body: string;
                     reply_to: number;
+                    seq: number;
                     turn: number;
-                    created_at: string;
                 }[];
-                next_seq: number;
                 latest_seq: number;
+                next_seq: number;
                 status: string;
                 timed_out: boolean;
             };
+            fee_usd: string;
+            id: string;
+            latency_ms: number;
+            provider: string;
+            status: string;
         };
         RoomInput: {
             room_id: string;
         };
         RoomJoinInput: {
-            room_id: string;
-            name: string;
             idempotency_key: string;
+            name: string;
+            room_id: string;
         };
         RoomListInput: {
             before_id?: string;
             limit?: number;
         };
         RoomListResult: {
-            id: string;
-            provider: string;
-            status: string;
-            latency_ms: number;
-            fee_usd: string;
             data: {
+                next_cursor: string;
                 rooms: null | {
-                    id: string;
-                    topic: string;
-                    host_id: string;
-                    visibility: string;
+                    created_at: string;
+                    current_speaker: string;
                     encryption: string;
-                    status: string;
+                    events: null | {
+                        body: string;
+                        created_at: string;
+                        kind: string;
+                        participant_id: string;
+                        reply_to: number;
+                        seq: number;
+                        turn: number;
+                    }[];
+                    host_id: string;
+                    id: string;
+                    max_rounds: number;
                     members: null | {
                         id: string;
                         name: string;
                         role: string;
                     }[];
-                    speakers: null | string[];
-                    max_rounds: number;
-                    turn: number;
-                    current_speaker: string;
                     seq: number;
-                    events: null | {
-                        seq: number;
-                        kind: string;
-                        participant_id: string;
-                        body: string;
-                        reply_to: number;
-                        turn: number;
-                        created_at: string;
-                    }[];
+                    speakers: null | string[];
+                    status: string;
                     summary: {
                         kind: string;
-                        through_seq: number;
                         message_seqs: null | number[];
                         text: string;
+                        through_seq: number;
                     };
-                    created_at: string;
+                    topic: string;
+                    turn: number;
+                    visibility: string;
                 }[];
-                next_cursor: string;
             };
+            fee_usd: string;
+            id: string;
+            latency_ms: number;
+            provider: string;
+            status: string;
         };
         RoomModerateInput: {
-            room_id: string;
             /** @description Host only: promote or demote in lobby; start; skip current speaker; close */
             action: string;
-            /** @description Required for promote/demote */
-            participant_id?: string;
             /** @description Current room sequence; rejects stale moderation */
             expected_seq: number;
             idempotency_key: string;
+            /** @description Required for promote/demote */
+            participant_id?: string;
+            room_id: string;
         };
         RoomPostInput: {
-            room_id: string;
             /** @description Public untrusted text, maximum 4096 UTF-8 bytes */
             body: string;
             /** @description Current turn number, starting at 1; rejects late replies */
             expected_turn: number;
+            idempotency_key: string;
             /** @description Optional existing message sequence */
             reply_to?: number;
-            idempotency_key: string;
+            room_id: string;
         };
         RoomQuestionInput: {
-            room_id: string;
             body: string;
             idempotency_key: string;
+            room_id: string;
         };
         RoomResult: {
+            data: {
+                room: {
+                    created_at: string;
+                    current_speaker: string;
+                    encryption: string;
+                    events: null | {
+                        body: string;
+                        created_at: string;
+                        kind: string;
+                        participant_id: string;
+                        reply_to: number;
+                        seq: number;
+                        turn: number;
+                    }[];
+                    host_id: string;
+                    id: string;
+                    max_rounds: number;
+                    members: null | {
+                        id: string;
+                        name: string;
+                        role: string;
+                    }[];
+                    seq: number;
+                    speakers: null | string[];
+                    status: string;
+                    summary: {
+                        kind: string;
+                        message_seqs: null | number[];
+                        text: string;
+                        through_seq: number;
+                    };
+                    topic: string;
+                    turn: number;
+                    visibility: string;
+                };
+                self_id: string;
+            };
+            fee_usd: string;
+            id: string;
+            latency_ms: number;
+            provider: string;
+            status: string;
+        };
+        RoomStudioCreateInput: {
+            idempotency_key: string;
+            /** @description 1-10 rounds; up to 5 invited speakers */
+            max_rounds: number;
+            /** @description Self-declared host display name, 1-60 bytes */
+            name: string;
+            plan: {
+                budget_micro_usd: string;
+                common_prompt: string;
+                guests: null | {
+                    agent_id?: string;
+                    max_output_tokens: number;
+                    model: string;
+                    name: string;
+                    provider: string;
+                    role: string;
+                    system_prompt: string;
+                }[];
+                version: number;
+            };
+            /** @description Public discussion topic, 1-200 UTF-8 bytes; no secrets */
+            topic: string;
+        };
+        RoomStudioDetail: {
+            execution_status: string;
+            plan: null | {
+                budget_micro_usd: string;
+                common_prompt: string;
+                guests: null | {
+                    agent_id?: string;
+                    max_output_tokens: number;
+                    model: string;
+                    name: string;
+                    provider: string;
+                    role: string;
+                    system_prompt: string;
+                }[];
+                version: number;
+            };
+            snapshot: {
+                room: {
+                    created_at: string;
+                    current_speaker: string;
+                    encryption: string;
+                    events: null | {
+                        body: string;
+                        created_at: string;
+                        kind: string;
+                        participant_id: string;
+                        reply_to: number;
+                        seq: number;
+                        turn: number;
+                    }[];
+                    host_id: string;
+                    id: string;
+                    max_rounds: number;
+                    members: null | {
+                        id: string;
+                        name: string;
+                        role: string;
+                    }[];
+                    seq: number;
+                    speakers: null | string[];
+                    status: string;
+                    summary: {
+                        kind: string;
+                        message_seqs: null | number[];
+                        text: string;
+                        through_seq: number;
+                    };
+                    topic: string;
+                    turn: number;
+                    visibility: string;
+                };
+                self_id: string;
+            };
+        };
+        RoomSummaryInput: {
+            /** @description Host-approved public summary, 1-16000 UTF-8 bytes; not automatically fact checked */
+            body: string;
+            idempotency_key: string;
+            /** @description 1-50 distinct existing guest message sequences supporting the summary */
+            message_seqs: null | number[];
+            room_id: string;
+            /** @description Exact closed room seq from get_room; prevents summarizing a stale transcript */
+            through_seq: number;
+        };
+        RoomWaitInput: {
+            after_seq: number;
+            room_id: string;
+            /** @description 1-20 seconds, default 20; does not wake a model automatically */
+            timeout_seconds?: number;
+        };
+        SwapQuoteInput: {
+            from_network: string;
+            to_network: string;
+            /** @description Exact EVM token address; zero address for native coin */
+            from_token: string;
+            to_token: string;
+            /** @description Positive uint256 base-unit integer string */
+            amount: string;
+            /** @description Source and recipient EVM wallet; no third-party recipient */
+            wallet: string;
+            /** @description 10 to 100 basis points (0.1 to 1 percent) */
+            slippage_bps: number;
+        };
+        SwapQuoteResult: {
             id: string;
             provider: string;
             status: string;
             latency_ms: number;
             fee_usd: string;
             data: {
-                room: {
-                    id: string;
-                    topic: string;
-                    host_id: string;
-                    visibility: string;
-                    encryption: string;
-                    status: string;
-                    members: null | {
-                        id: string;
-                        name: string;
-                        role: string;
-                    }[];
-                    speakers: null | string[];
-                    max_rounds: number;
-                    turn: number;
-                    current_speaker: string;
-                    seq: number;
-                    events: null | {
-                        seq: number;
-                        kind: string;
-                        participant_id: string;
-                        body: string;
-                        reply_to: number;
-                        turn: number;
-                        created_at: string;
-                    }[];
-                    summary: {
-                        kind: string;
-                        through_seq: number;
-                        message_seqs: null | number[];
-                        text: string;
-                    };
-                    created_at: string;
+                quote_id: string;
+                request: {
+                    from_network: string;
+                    to_network: string;
+                    /** @description Exact EVM token address; zero address for native coin */
+                    from_token: string;
+                    to_token: string;
+                    /** @description Positive uint256 base-unit integer string */
+                    amount: string;
+                    /** @description Source and recipient EVM wallet; no third-party recipient */
+                    wallet: string;
+                    /** @description 10 to 100 basis points (0.1 to 1 percent) */
+                    slippage_bps: number;
                 };
-                self_id: string;
-            };
-        };
-        RoomStudioCreateInput: {
-            /** @description Public discussion topic, 1-200 UTF-8 bytes; no secrets */
-            topic: string;
-            /** @description Self-declared host display name, 1-60 bytes */
-            name: string;
-            /** @description 1-10 rounds; up to 5 invited speakers */
-            max_rounds: number;
-            idempotency_key: string;
-            plan: {
-                version: number;
-                common_prompt: string;
-                budget_micro_usd: string;
-                guests: null | {
-                    agent_id?: string;
+                from_token: {
+                    network: string;
+                    address: string;
+                    symbol: string;
                     name: string;
-                    role: string;
-                    provider: string;
-                    model: string;
-                    system_prompt: string;
-                    max_output_tokens: number;
-                }[];
-            };
-        };
-        RoomStudioDetail: {
-            snapshot: {
-                room: {
-                    id: string;
-                    topic: string;
-                    host_id: string;
-                    visibility: string;
-                    encryption: string;
-                    status: string;
-                    members: null | {
-                        id: string;
-                        name: string;
-                        role: string;
-                    }[];
-                    speakers: null | string[];
-                    max_rounds: number;
-                    turn: number;
-                    current_speaker: string;
-                    seq: number;
-                    events: null | {
-                        seq: number;
-                        kind: string;
-                        participant_id: string;
-                        body: string;
-                        reply_to: number;
-                        turn: number;
-                        created_at: string;
-                    }[];
-                    summary: {
-                        kind: string;
-                        through_seq: number;
-                        message_seqs: null | number[];
-                        text: string;
-                    };
-                    created_at: string;
+                    decimals: number;
                 };
-                self_id: string;
-            };
-            plan: null | {
-                version: number;
-                common_prompt: string;
-                budget_micro_usd: string;
-                guests: null | {
-                    agent_id?: string;
+                to_token: {
+                    network: string;
+                    address: string;
+                    symbol: string;
                     name: string;
-                    role: string;
-                    provider: string;
-                    model: string;
-                    system_prompt: string;
-                    max_output_tokens: number;
+                    decimals: number;
+                };
+                to_amount: string;
+                minimum_amount: string;
+                tool: string;
+                approval_address: string;
+                transaction: {
+                    network: string;
+                    from: string;
+                    to: string;
+                    data: string;
+                    value: string;
+                };
+                costs: null | {
+                    name: string;
+                    amount: string;
+                    token: {
+                        network: string;
+                        address: string;
+                        symbol: string;
+                        name: string;
+                        decimals: number;
+                    };
+                    included: boolean;
                 }[];
+                fetched_at: string;
+                expires_at: string;
             };
-            execution_status: string;
         };
-        RoomSummaryInput: {
-            room_id: string;
-            /** @description Host-approved public summary, 1-16000 UTF-8 bytes; not automatically fact checked */
-            body: string;
-            /** @description Exact closed room seq from get_room; prevents summarizing a stale transcript */
-            through_seq: number;
-            /** @description 1-50 distinct existing guest message sequences supporting the summary */
-            message_seqs: null | number[];
-            idempotency_key: string;
+        SwapStatusInput: {
+            from_network: string;
+            to_network: string;
+            tx_hash: string;
         };
-        RoomWaitInput: {
-            room_id: string;
-            after_seq: number;
-            /** @description 1-20 seconds, default 20; does not wake a model automatically */
-            timeout_seconds?: number;
+        SwapStatusResult: {
+            id: string;
+            provider: string;
+            status: string;
+            latency_ms: number;
+            fee_usd: string;
+            data: {
+                tx_hash: string;
+                /** @description pending, completed, failed or unknown; source mining alone does not imply cross-chain completion */
+                state: string;
+                substatus: string;
+                receiving_tx_hash: string;
+            };
+        };
+        SwapTokensInput: {
+            network: string;
+        };
+        SwapTokensResult: {
+            id: string;
+            provider: string;
+            status: string;
+            latency_ms: number;
+            fee_usd: string;
+            data: null | {
+                network: string;
+                address: string;
+                symbol: string;
+                name: string;
+                decimals: number;
+            }[];
         };
         Token: {
             contract: string;
@@ -1713,6 +1916,15 @@ export interface components {
             symbol: string;
             /** @enum {string} */
             variant: "issuer-native" | "binance-peg" | "usdt0";
+            /**
+             * @description stablecoin or tokenized_equity
+             * @enum {string}
+             */
+            asset_class: "stablecoin" | "tokenized_equity";
+            /** @description Underlying stock ticker for tokenized_equity entries */
+            underlying?: string;
+            /** @description Tokenized-equity issuer */
+            issuer?: string;
         };
         TokenBalanceInput: {
             address: components["schemas"]["BalanceInput"]["address"];
@@ -1798,6 +2010,27 @@ export interface components {
         VerifyInput: {
             id: string;
             signature: string;
+        };
+        RWATokenBalanceInput: {
+            address: components["schemas"]["BalanceInput"]["address"];
+            /** @description Allowlisted tokenized-equity contract (asset_class=tokenized_equity) from GET /v1/tokens */
+            contract: string;
+            /**
+             * @description Ethereum in the first release
+             * @enum {string}
+             */
+            network: "eip155:1";
+            provider?: components["schemas"]["BalanceInput"]["provider"];
+        };
+        EquityPriceInput: {
+            /** @description Allowlisted tokenized-equity contract (asset_class=tokenized_equity) from GET /v1/tokens */
+            contract: string;
+            /**
+             * @description Ethereum in the first release
+             * @enum {string}
+             */
+            network: "eip155:1";
+            provider?: string;
         };
     };
     responses: never;
@@ -3849,6 +4082,8 @@ export interface operations {
         parameters: {
             query: {
                 after_seq: number;
+                /** @description App session only. Stream complete RoomResult snapshots and heartbeats for up to 25 seconds; reconnect using the last applied sequence. Closed rooms remain observable. */
+                live?: boolean;
             };
             header?: never;
             path: {
@@ -3858,13 +4093,112 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description room_batch event containing RoomEventsResult; at most 20s wait */
+            /** @description Default: room_batch containing RoomEventsResult, at most 20s wait. live=true: room_snapshot containing RoomResult, heartbeat comments, room_reconnect for normal renewal or room_error with code. No credentials in URLs. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "text/event-stream": string;
+                };
+            };
+        };
+    };
+    get_swap_quote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SwapQuoteInput"];
+            };
+        };
+        responses: {
+            /** @description Read-only success, not transaction execution */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SwapQuoteResult"];
+                };
+            };
+            /** @description Invalid input, unavailable provider or rate limit */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    get_swap_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SwapStatusInput"];
+            };
+        };
+        responses: {
+            /** @description Read-only success, not transaction execution */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SwapStatusResult"];
+                };
+            };
+            /** @description Invalid input, unavailable provider or rate limit */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    get_swap_tokens: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SwapTokensInput"];
+            };
+        };
+        responses: {
+            /** @description Read-only success, not transaction execution */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SwapTokensResult"];
+                };
+            };
+            /** @description Invalid input, unavailable provider or rate limit */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -3905,6 +4239,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Usage"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    rwaTokenBalance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RWATokenBalanceInput"];
+            };
+        };
+        responses: {
+            /** @description Exact tokenized-equity balance; on-chain observation, not eligibility */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BalanceResult"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    equityPrice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EquityPriceInput"];
+            };
+        };
+        responses: {
+            /** @description Reference USD price of the underlying stock; not an executable quote */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PriceResult"];
                 };
             };
             /** @description Error */
